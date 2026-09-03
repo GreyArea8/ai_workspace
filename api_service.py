@@ -1,5 +1,7 @@
 import os
 import re
+import time
+import threading
 import requests
 from flask import Flask, request, jsonify
 
@@ -7,21 +9,21 @@ app = Flask(__name__)
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID")  # Optional target for autonomous reports
+
+# Autonomous Task Queue & State Management
+task_queue = []
+agent_status = "IDLE"
 
 def process_user_request(prompt):
     text = prompt.lower().strip()
     
-    # 1. Standard OBD-II Trouble Code Regex Match (e.g., P0442, C0350, B0010, U0100)
     if re.match(r"^[pbcsu]\d{4}$", text):
         return f"DTC Lookup for {text.upper()}: Check related sensor circuits, wiring harness, connector pins, and reference voltage. Verify live freeze frame data."
-    
-    # 2. Keyword Subsystem Routines
     elif "evap" in text or "leak" in text:
         return "Diagnostic Rule: Check purge valve, vent solenoid, gas cap seal, and pressure sensor for EVAP system integrity."
     elif "code" in text or "dtc" in text:
         return "Diagnostic Lookup: Please provide the specific OBDII trouble code (e.g., P0442) for targeted troubleshooting steps."
-    
-    # 3. Cadillac Escalade Multi-Level Subsystem Branching
     elif "escalade" in text:
         if "suspension" in text or "air ride" in text or "strut" in text:
             return "Escalade Air Suspension: Inspect compressor relay, airline connections, height sensors, and electronic damping control fuses."
@@ -33,10 +35,23 @@ def process_user_request(prompt):
             return "Escalade Brakes: Inspect wheel speed sensor wiring harness, ABS module ground, and brake booster vacuum line."
         else:
             return "Vehicle Context: Cadillac Escalade system selected. Specify target symptom (e.g., suspension, transmission, engine knock, brakes) to proceed."
-            
-    # 4. General Catch-All
     else:
-        return f"Processed request: {prompt} (System ready for advanced command routing.)"
+        return f"Processed request: {prompt} (Autonomous agent loop active.)"
+
+def background_autonomous_worker():
+    """Continuously evaluates queued tasks and executes background operations."""
+    global agent_status
+    while True:
+        agent_status = "RUNNING"
+        if task_queue:
+            task = task_queue.pop(0)
+            # Process autonomous task steps here
+            print(f"Executing autonomous task: {task}")
+        time.sleep(10)
+
+# Start background loop thread
+worker_thread = threading.Thread(target=background_autonomous_worker, daemon=True)
+worker_thread.start()
 
 @app.route("/", methods=["POST"])
 def webhook():
@@ -61,9 +76,13 @@ def webhook():
         
     return jsonify({"status": "ignored"})
 
+@app.route("/status", methods=["GET"])
+def status_check():
+    return jsonify({"status": agent_status, "queue_length": len(task_queue)}), 200
+
 @app.route("/", methods=["GET"])
 def health_check():
-    return "Cadillac Escalade Diagnostic Bot service is live.", 200
+    return "Autonomous agent service is live.", 200
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
