@@ -13,7 +13,6 @@ class HealthHandler(BaseHTTPRequestHandler):
 
 def run_task_loop():
     while True:
-        # Background automation task loop
         time.sleep(60)
 
 if __name__ == "__main__":
