@@ -1,39 +1,3 @@
-import os
-import threading
-import asyncio
-import requests
-from flask import Flask, request, jsonify
-from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
-
-app = Flask(__name__)
-
-RENDER_API_URL = "https://ai-workspace-mpif.onrender.com"
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-
-def process_user_request(prompt):
-    text = prompt.lower()
-    if "evap" in text or "leak" in text:
-        return "Diagnostic Rule: Check purge valve, vent solenoid, and gas cap seal for EVAP system integrity."
-    elif "code" in text or "dtc" in text:
-        return "Diagnostic Lookup: Please provide the specific OBDII trouble code (e.g., P0442) for targeted troubleshooting steps."
-    elif "escalade" in text:
-        return "Vehicle Context: Cadillac Escalade system selected. Specify symptom (e.g., suspension, transmission, engine knock) to proceed."
-    else:
-        return f"Processed request: {prompt} (System ready for advanced command routing.)"
-
-@app.route("/", methods=["POST"])
-def webhook():
-    data = request.get_json() or {}
-    prompt = data.get("prompt", "")
-    reply = process_user_request(prompt)
-    return jsonify({"reply": reply})
-
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_text = update.message.text
-    try:
-        response = requests.post(RENDER_API_URL, json={"prompt": user_text}, timeout=10)
-        data = response.json()
         reply = data.get("reply", "Command received, but no reply formatted.")
     except Exception as e:
         reply = f"Error communicating with Render backend: {e}"
