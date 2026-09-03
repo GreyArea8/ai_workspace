@@ -27,10 +27,10 @@ def run_task_loop():
         time.sleep(60)
 
 if __name__ == "__main__":
-    task_thread = threading.Thread(target=run_task_loop, daemon=True)
-    task_thread.start()
+    # Start the background task loop in a separate thread
+    t = threading.Thread(target=run_task_loop, daemon=True)
+    t.start()
 
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), HealthHandler)
-    print(f"Health check server live on port {port}")
+    # Start the HTTP server on port 10000 for Render health checks
+    server = HTTPServer(('0.0.0.0', 10000), HealthHandler)
     server.serve_forever()
