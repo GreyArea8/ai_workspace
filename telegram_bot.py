@@ -20,6 +20,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+    # Updated to handle all text inputs, including commands like /start
+    app.add_handler(MessageHandler(filters.TEXT, handle_message))
     print("Telegram control bot polling for cross-device commands...")
     app.run_polling()
