@@ -2,8 +2,10 @@ import os
 import threading
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
-# Import your actual pipeline execution module/function here (e.g., from your main script)
-# import main_pipeline_module
+
+# Import your monetization modules
+import dual_engine_generator
+import publisher
 
 class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -16,11 +18,12 @@ class HealthHandler(BaseHTTPRequestHandler):
 def run_task_loop():
     while True:
         try:
-            # Trigger your master cycle here
-            # main_pipeline_module.run_master_cycle()
-            pass
+            print("--- Starting Automated Revenue Cycle ---")
+            dual_engine_generator.generate_dynamic_assets()
+            publisher.publish_releases()
+            print("--- Revenue Cycle Complete ---")
         except Exception as e:
-            print(f"Error in task loop: {e}")
+            print(f"Error in revenue cycle: {e}")
         time.sleep(60)
 
 if __name__ == "__main__":
