@@ -13,12 +13,15 @@ class HealthHandler(BaseHTTPRequestHandler):
 
 def run_task_loop():
     while True:
+        # Place your master cycle execution or delay logic here
         time.sleep(60)
 
 if __name__ == "__main__":
+    # Start the automation loop in the background
     task_thread = threading.Thread(target=run_task_loop, daemon=True)
     task_thread.start()
 
+    # Bind the main thread to Render's required PORT for instant health checks
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("0.0.0.0", port), HealthHandler)
     print(f"Health check server live on port {port}")
