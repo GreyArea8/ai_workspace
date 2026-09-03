@@ -1,39 +1,3 @@
-import os
-import threading
-import time
-import json
-from http.server import HTTPServer, BaseHTTPRequestHandler
-
-# Import your monetization modules
-import dual_engine_generator
-import publisher
-
-class HealthHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        # Serve paid utility endpoints alongside health checks
-        if self.path == '/' or self.path == '/health':
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            response_data = {
-                "status": "online",
-                "service": "Automated Technical Diagnostics & Utilities",
-                "message": "To unlock full diagnostic datasets and automated scripts, complete payment via our secure checkout.",
-                "checkout_url": "https://www.paypal.me/CornellEugene"
-            }
-            self.wfile.write(json.dumps(response_data).encode())
-        else:
-            self.send_response(404)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            error_data = {
-                "error": "Endpoint not found",
-                "support_checkout": "https://www.paypal.me/CornellEugene"
-            }
-            self.wfile.write(json.dumps(error_data).encode())
-
-    def log_message(self, format, *args):
-        return
 
 def run_task_loop():
     while True:
