@@ -2,8 +2,7 @@
 def run_task_loop():
     while True:
         try:
-            print("--- Starting Automated Revenue Cycle ---")
-            dual_engine_generator.generate_dynamic_assets()
+            print("--- Starting Automated Revenue Cycle ---")            dual_engine_generator.generate_dynamic_assets()
             publisher.publish_releases()
             print("--- Revenue Cycle Complete ---")
         except Exception as e:
