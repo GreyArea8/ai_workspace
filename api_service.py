@@ -11,11 +11,20 @@ app = Flask(__name__)
 RENDER_API_URL = "https://ai-workspace-mpif.onrender.com"
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 
+def process_user_request(prompt):
+    """
+    Modular backend processing function. 
+    Replace or extend this block to integrate your custom logic, 
+    database handlers, or external AI API calls.
+    """
+    # Custom business logic or AI processing goes here
+    return f"Processed backend response for: {prompt}"
+
 @app.route("/", methods=["POST"])
 def webhook():
     data = request.get_json() or {}
     prompt = data.get("prompt", "")
-    reply = f"Processed prompt: {prompt}"
+    reply = process_user_request(prompt)
     return jsonify({"reply": reply})
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
