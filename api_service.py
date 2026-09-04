@@ -1,3 +1,12 @@
+import os
+import time
+from flask import Flask
+
+app = Flask(__name__)
+
+task_queue = []
+agent_status = "IDLE"
+
 def background_autonomous_worker():
     """Continuously evaluates queued tasks and executes background operations."""
     global agent_status
@@ -14,7 +23,10 @@ def background_autonomous_worker():
         else:
             agent_status = "IDLE"
         time.sleep(5)
-import os
+
+@app.route("/")
+def home():
+    return "Autonomous API Service is live and active!"
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
