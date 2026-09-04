@@ -1,10 +1,11 @@
 import os
 import time
-from flask import Flask
+import threading
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-task_queue = []
+task_queue = ["Survey optimization pipeline", "Automated vehicle diagnostic processing"]
 agent_status = "IDLE"
 
 def background_autonomous_worker():
@@ -26,8 +27,17 @@ def background_autonomous_worker():
 
 @app.route("/")
 def home():
-    return "Autonomous API Service is live and active!"
+    return f"Autonomous API Service is live! Status: {agent_status}, Queue Size: {len(task_queue)}"
+
+@app.route("/enqueue", methods=["POST"])
+def enqueue_task():
+    data = request.json or {}
+    task = data.get("task", "General automation task")
+    task_queue.append(task)
+    return jsonify({"status": "queued", "task": task, "queue_length": len(task_queue)})
 
 if __name__ == "__main__":
+    # Start background thread for continuous autonomous loop execution
+    threading.Thread(target=background_autonomous_worker, daemon=True).start()
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
