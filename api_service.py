@@ -87,3 +87,31 @@ def execute_micro_task_pipeline(task_text):
     print(f"Executing deep worker automation for: {task_text}")
     # Integration point for micro_task_engine & optimizer routines
     return f"Success. Revenue dispatched to {payout_link}"
+from earning_client import fetch_available_offers, submit_task_completion
+
+def background_autonomous_worker():
+    while True:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, task_text FROM tasks WHERE status = 'QUEUED' LIMIT 1")
+        row = cursor.fetchone()
+        
+        if row:
+            task_id, task = row
+            cursor.execute("UPDATE tasks SET status = 'RUNNING' WHERE id = ?", (task_id,))
+            conn.commit()
+            conn.close()
+            
+            print(f"Processing production execution for: {task}")
+            offers = fetch_available_offers()
+            if offers:
+                # Process the primary available offer automatically
+                target_offer = offers[0]
+                submit_task_completion(target_offer["id"])
+                
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE tasks SET status = 'COMPLETED' WHERE id = ?", (task_id,))
+            conn.commit()
+        conn.close()
+        time.sleep(5)
