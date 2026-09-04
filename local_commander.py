@@ -1,40 +1,33 @@
-import subprocess
-import requests
+import urllib.request
 import json
-import os
+import time
 
-RENDER_WEBHOOK_URL = "https://ai-workspace-mpif.onrender.com"
-
-def git_commit_and_push(commit_message="Autonomous update"):
+def check_status():
     try:
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", commit_message], check=True)
-        subprocess.run(["git", "push", "origin", "master"], check=True)
-        print("Successfully pushed updates to GitHub.")
-    except subprocess.CalledProcessError as e:
-        print(f"Git operation failed: {e}")
-
-def enqueue_task(task_description):
-    url = f"{RENDER_WEBHOOK_URL}/task"
-    payload = {"task": task_description}
-    headers = {"Content-Type": "application/json"}
-    
-    try:
-        response = requests.post(url, data=json.dumps(payload), headers=headers, timeout=10)
-        if response.status_code == 200:
-            print(f"Task successfully queued: {task_description}")
-            print(response.json())
-        else:
-            print(f"Failed to queue task: {response.text}")
+        req = urllib.request.Request("http://127.0.0.1:5000/status")
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            print(f"Agent Status: {data}")
+            return data
     except Exception as e:
-        print(f"Connection error: {e}")
+        print(f"Status check error: {e}")
+        return None
 
-def check_agent_status():
+def enqueue_task(task_name):
     try:
-        response = requests.get(f"{RENDER_WEBHOOK_URL}/status", timeout=10)
-        print("Agent Status:", response.json())
+        payload = json.dumps({"task": task_name}).encode("utf-8")
+        req = urllib.request.Request("http://127.0.0.1:5000/enqueue", data=payload, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            print(f"Task successfully queued: {data}")
+            return data
     except Exception as e:
-        print(f"Failed to fetch status: {e}")
+        print(f"Enqueue error: {e}")
+        return None
 
 if __name__ == "__main__":
-    check_agent_status()
+    print("Starting autonomous command loop...")
+    check_status()
+    enqueue_task("Run automated survey micro-task pipeline targeting payout")
+    time.sleep(2)
+    check_status()
