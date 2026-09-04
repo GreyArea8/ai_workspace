@@ -14,7 +14,15 @@ def background_autonomous_worker():
         else:
             agent_status = "IDLE"
         time.sleep(5)
+
 import os
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "Service Active", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
